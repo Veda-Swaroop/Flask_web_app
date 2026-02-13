@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <body class="p-3 mb-2 bg-secondary text-white">
+
+        <nav class="navbar sticky-top bg-dark-subtle">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Password Reset</a>
+                <a class="btn btn-primary" href="{{ url_for('logout') }}">Log out</a>
+            </div>
+
+        </nav>
+
+
+        {% if row %}
+
+        <div class="d-flex justify-content-center align-items-center vh-100">
+
+            <div class="card text-center mb-3" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">Create new password</h5>
+
+                    <form action="/reset" method="post">
+
+                        <input type="hidden" name="user_id" value="{{ row }}">
+                        
+                        <div class="mb-3">
+                            <input type="password" class="form-control" name="new_password" placeholder="Enter new password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% elif message %}
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} fade show mt-3" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+            <a href="{{ url_for('login') }}">Login</a>
+            
+
+        {% else %}
+
+        <div class="d-flex justify-content-center align-items-center vh-100">
+
+            <div class="card text-center mb-3" style="width: 18rem;">
+
+                <div class="card-body">
+                    <h5 class="card-title">Let us verify Account</h5>
+
+                    <form action="/verify" method="post">
+                        
+                            <div class="mb-3">
+                                <input type="text" class="form-control" name="username" placeholder="Enter Username" required>
+                            </div>
+                        
+                            <button type="submit" class="btn btn-primary">check</button>
+                        
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} fade show mt-3" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+
+        {% endif %}
+
+    </body>
+
+{% endblock %}
