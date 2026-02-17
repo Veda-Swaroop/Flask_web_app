@@ -1,55 +1,44 @@
 {% extends "layout.html" %}
 
 {% block body %}
+        
+    <div class="card text-center mb-3" style="width: 20rem;">
 
-    <body class="p-3 mb-2 bg-secondary text-white">
+        <div class="card-body">
+            <h4> Create a new account</h4>
+            <form action="{{ url_for('register') }}" method="post">
 
-        <div class="d-flex justify-content-center align-items-center vh-100">
-            
-            <div class="card text-center mb-3" style="width: 18rem;">
-
-                <div class="card-body">
-                    <h4> Create a new account</h4>
-                    <form method="post">
-
-                        <div class="mb-3">
-                            <input type="text" class="form-control" name = "username" placeholder="Enter Username" autofocus required>
-                        </div>
-
-                        <div class="mb-3">
-                            <input type="password" class="form-control" name="password" placeholder="Enter Password" required>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Register</button>
-
-
-                        <div>
-                            <a href="{{ url_for('login') }}" class="card-link">Already have an account?</a>
-                        </div>
-                    
-                        
-                    </form>
-                    
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} fade show mt-3" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
-
+                <div class="mb-3">
+                    <input type="text" class="form-control" name = "username" placeholder="Enter Username" autofocus required>
                 </div>
 
-
-            </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" name="password" placeholder="Enter Password" required>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+                
+                <div>
+                    <a href="{{ url_for('login') }}" class="card-link">Already have an account?</a>
+                </div>
+            
+                
+            </form>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} fade show mt-3" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
         </div>
 
-
-    </body>
-
+    </div>
 
 {% endblock %}

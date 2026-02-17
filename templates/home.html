@@ -2,19 +2,8 @@
 
 {% block body %}
 
-    <nav class="navbar sticky-top bg-dark-subtle">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Home</a>
-            <a class="btn btn-primary" href="{{ url_for('logout') }}">Log out</a>
-        </div>
-
-    </nav>
-
     <div class="mt-5 pt-5 text-center">
         <h3>Welcome, {{ name }}</h3>
     </div>
-    
-    
-
 
 {% endblock %}

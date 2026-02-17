@@ -1,47 +1,49 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<body class="p-3 mb-2 bg-secondary text-white">
+    <div class="p-3 mb-2 bg-secondary text-white">
 
-    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="container">
 
-        <div class="card text-center mb-3" style="width: 18rem;">
-            <div class="card-body">
-                <h5 class="card-title">Login</h5>
-                <form action="/login" method="post">
-
-                    <div class="mb-3">
-                        <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Username" name="username" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <input type="password" class="form-control" autocomplete="off" placeholder="password" name="password" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
-
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} fade show mt-3" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-                
-                <a href="{{ url_for('verify') }}" class="card-link">Forgot Password?</a>
-
+            <div class="card text-center mb-3" style="width: 20rem;">
                 <div class="card-body">
-                    <a href="{{ url_for('register') }}" class="btn btn-success">Create new account</a> 
+                    <h5 class="card-title">Login</h5>
+                    <form action="{{ url_for('login') }}" method="post">
+
+                        <div class="mb-3">
+                            <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Username" name="username" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="password" class="form-control" autocomplete="off" placeholder="password" name="password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} fade show mt-3" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div>
+                        <a href="{{ url_for('verify') }}" class="card-link">Forgot Password?</a>
+                    </div>
+                    
+                    <div class="card-body">
+                        <a href="{{ url_for('register') }}" class="btn btn-success">Create new account</a> 
+                    </div>
+                    
                 </div>
-                
+
             </div>
-
         </div>
-    </div>
 
-</body>
+    </div>
 
 {% endblock %}

@@ -3,14 +3,6 @@
 {% block body %}
 
 
-    <nav class="navbar sticky-top bg-dark-subtle">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Admin Panel</a>
-            <a class="btn btn-primary" href="{{ url_for('logout') }}">Log out</a>
-        </div>
-
-    </nav>
-
     <div class="container text-center" style="margin-top: 70px;">
 
         <table class="table table-sm table-striped table-hover table-bordered">
@@ -18,7 +10,7 @@
                 <tr>
                     <th scope="col">ID</th>
                     <th scope="col">Username</th>
-                    <th scope="col">Password</th>
+                    <th scope="col">Remove account</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,9 +18,8 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ account.username }}</td>
-                    <td>{{ account.password }}</td>
                     <td>
-                        <form action="/admin" method="post">
+                        <form action="{{ url_for('admin') }}" method="post">
                             <input type="hidden" name="id" value="{{ account.id }}">
                             <button type="submit" class="btn btn-outline-danger">delete</button>
                         </form>
@@ -39,6 +30,8 @@
         </table>
 
     </div>
+
+    
 
  
 
