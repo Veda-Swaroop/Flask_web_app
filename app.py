@@ -1,36 +1,26 @@
-from flask import Flask, render_template, request, session, redirect, flash, url_for, g
+from flask import Flask, render_template, request, session, redirect, flash, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_session import Session
-import sqlite3
+from extensions import db
+
 
 app = Flask(__name__)
 
 app.config["SESSION_PERMANENT"] =  False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = "some_random_secret"
 Session(app)
 
-#db = SQL("sqlite:///data.db")
-DATABASE = "data.db"
+db.init_app(app)
 
 
-def get_db() -> sqlite3.Connection:
-    db = getattr(g, "db", None)
+from models import User
 
-    if db is None:
-        db = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row
-        g.db = db
 
-    return db
-    
-
-@app.teardown_appcontext
-def close_db(error):
-    db = g.pop("db", None)
-
-    if db is not None:
-        db.close()
+with app.app_context():
+    db.create_all()
 
 
 
@@ -42,33 +32,40 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+
         usr_name = request.form.get("username")
         pwd = request.form.get("password")
 
-        if usr_name and pwd:
-            db = get_db()
-            row = db.execute("SELECT * FROM accounts WHERE username = ?", (usr_name,)).fetchone()
+        if not usr_name or not pwd:
+            flash("Enter username and password", "danger")
+            return redirect(url_for("login"))
+        
+        if len(usr_name) < 3:
+            flash("username must be atleast 3 characters", "warning")
+        
+        if len(pwd) < 4:
+            flash("password must be atleast 4 characters", "warning")
+        
+        user = User.query.filter_by(username=usr_name).first()
 
-            if row and check_password_hash(row["password"], pwd):
-                session["user_id"] = row["id"]
-                session["username"] = row["username"]
+        if user and check_password_hash(user.password, pwd):
+            session["user_id"] = user.id
+            session["username"] = user.username
 
-                if usr_name == "admin":
-                    return redirect (url_for("admin"))
-
-                return redirect(url_for("home"))
+            if user.is_admin:
+                return redirect(url_for("admin"))
             
-            else:
-                flash("Invalid Username or Password!", "danger")
-                return redirect(url_for("login"))
-        # else:
-        #     flash("Enter username and password", "danger")
+            return redirect(url_for("home"))
+            
+        flash("Invalid Username or Password!", "danger")
+        return redirect(url_for("login"))    
         
     return render_template("index.html")
 
 @app.route("/logout")
 def logout():
     session.clear()
+    flash("You have successfully logged out!", "success")
     return render_template("logout.html")
 
 @app.route("/home")
@@ -82,24 +79,35 @@ def home():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+
         usr_name = request.form.get("username")
-        db = get_db()
-        existing = db.execute("SELECT id FROM accounts WHERE username = ?", (usr_name,)).fetchone()
+        pwd = request.form.get("password")
+
+        if not usr_name or len(usr_name) < 3:
+            flash("username must be atleast 3 characters", "warning")
+            return redirect(url_for("register"))
+
+        if not pwd or len(pwd) < 4:
+            flash("password must be atleast 4 characters", "warning")
+            return redirect(url_for("register"))
+            
+
+        existing = User.query.filter_by(username=usr_name).first()
         if existing:
             flash("Username already exists!", "danger")
             return redirect(url_for("register"))
         
-        pwd = request.form.get("password")
-        if pwd:
-            hashed_pwd = generate_password_hash(pwd)
-            db = get_db()
-            db.execute("INSERT INTO accounts (username, password) VALUES (?, ?)", (usr_name, hashed_pwd))
-            db.commit()
-            flash("Account created successfully!", "success")
-            return redirect(url_for("login"))
-        else:
-            flash("Enter Password!", "warning")
+        
+        user = User(
+            username = usr_name,
+            password = generate_password_hash(pwd)
+        )
 
+        db.session.add(user)
+        db.session.commit()
+
+        flash("Account created successfully!", "success")
+        return redirect(url_for("login"))
 
     return render_template("register.html")
 
@@ -114,12 +122,12 @@ def admin():
         account_id = request.form.get("id")
         
         if account_id:
-            db = get_db()
-            db.execute("DELETE FROM accounts WHERE id = ?", (int(account_id),))
-            db.commit()
+            user = User.query.get(int(account_id))
+            if user:
+                db.session.delete(user)
+                db.session.commit()
 
-    db = get_db()
-    accounts = db.execute("SELECT * FROM accounts").fetchall()
+    accounts = User.query.all()
     return render_template("admin.html", accounts=accounts)
 
 
@@ -130,15 +138,15 @@ def verify():
 
         if not usr_name:
             flash("Enter Username!", "warning")
-            return render_template("verify.html")
+            return redirect(url_for("verify"))
 
-        db = get_db()
-        row = db.execute("SELECT id FROM accounts WHERE username = ?", (usr_name,)).fetchone()
+        user = User.query.filter_by(username=usr_name).first()
     
-        if row:
-            return render_template("reset.html", user_id=row["id"])
+        if user and usr_name != "admin":
+            return render_template("reset.html", user_id=user.id)
         else:
             flash("Invalid Username", "danger")
+            return redirect(url_for("verify"))
             
     return render_template("verify.html")
 
@@ -165,24 +173,18 @@ def reset():
         if new_pwd != confirm_pwd:
             flash("Passwords do not match!", "danger")
             return render_template("reset.html", user_id=user_id)
-
-
-        db = get_db()
-
        
-        user = db.execute("SELECT id FROM accounts WHERE id = ?", (int(user_id),)).fetchone()
+        user = User.query.get(int(user_id))
        
         if not user:
             flash("Invalid user!", "danger")
             return redirect(url_for("verify"))
         
-        hashed_pwd = generate_password_hash(new_pwd)
-        db.execute("UPDATE accounts SET password = ? WHERE id = ?", (hashed_pwd, int(user_id)))
-        db.commit()
+        user.pwd = generate_password_hash(new_pwd)
+        db.session.commit()
+
         flash("Password reset successful!", "success")
         return redirect(url_for("login"))
     
-
-
     return render_template("reset.html")
 
