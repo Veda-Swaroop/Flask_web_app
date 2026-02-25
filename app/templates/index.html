@@ -8,7 +8,7 @@
             <div class="card text-center mb-3" style="width: 20rem;">
                 <div class="card-body">
                     <h5 class="card-title">Login</h5>
-                    <form action="{{ url_for('login') }}" method="post">
+                    <form action="{{ url_for('auth.login') }}" method="post">
 
                         <div class="mb-3">
                             <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Username" name="username" required minlength="3" pattern="^[a-zA-Z0-9_]+$">
@@ -30,13 +30,15 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
+
+                    
                     
                     <div>
-                        <a href="{{ url_for('verify') }}" class="card-link">Forgot Password?</a>
+                        <a href="{{ url_for('auth.verify') }}" class="card-link">Forgot Password?</a>
                     </div>
                     
                     <div class="card-body">
-                        <a href="{{ url_for('register') }}" class="btn btn-success">Create new account</a> 
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-success">Create new account</a> 
                     </div>
                     
                 </div>

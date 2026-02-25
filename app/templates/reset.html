@@ -4,12 +4,17 @@
 
     <div class="card text-center mb-3" style="width: 20rem;">
         <div class="card-body">
-            <h5 class="card-title">Let's verify your account</h5>
+            <h5 class="card-title">Create new password</h5>
+            <form action="{{ url_for('auth.reset') }}" method="post">
 
-            <form action="{{ url_for('verify') }}" method="post">
+                <input type="hidden" class="form-control" name="user_id" value="{{ user_id }}">
 
                 <div class="mb-3">
-                    <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Enter username" name="username" required>
+                    <input type="password" class="form-control" autocomplete="off" autofocus placeholder="Enter password" name="new_password" required>
+                </div>
+
+                <div class="mb-3">
+                    <input type="password" class="form-control" autocomplete="off" placeholder="Confirm password" name="confirm_password" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Submit</button>

@@ -12,16 +12,16 @@
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">Flask app</a>
                 
-                {% if session.username %}
+                {% if current_user.is_authenticated %}
                     <span class="navbar-text-me-3">
-                        Welcome, {{ session.username }}
+                        Welcome, {{ current_user.username }}
                     </span>
-                    <a class="btn btn-primary" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="btn btn-primary" href="{{ url_for('auth.logout') }}">Logout</a>
                 {% endif %}
             </div>
         </nav>
         
-        <main class="flex-fill d-flex justify-content-center align-items-center">
+        <main class="flex-fill d-flex flex-column justify-content-center align-items-center">
              {% block body %}{% endblock %}
         </main>
         
@@ -35,6 +35,7 @@
                 </a> • MIT License
             </div>
         </footer>
+
 
 
 

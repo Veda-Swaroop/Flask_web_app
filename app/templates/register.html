@@ -6,7 +6,7 @@
 
         <div class="card-body">
             <h4 class="card-title"> Create a new account</h4>
-            <form action="{{ url_for('register') }}" method="post">
+            <form action="{{ url_for('auth.register') }}" method="post">
 
                 <div class="mb-3">
                     <input type="text" class="form-control" name = "username" placeholder="Enter Username" autofocus required minlength="3" maxlength="20" pattern="^[a-zA-Z0-9_]+$">
@@ -21,7 +21,7 @@
                 </div>
                 
                 <div>
-                    <a href="{{ url_for('login') }}" class="card-link">Already have an account?</a>
+                    <a href="{{ url_for('auth.login') }}" class="card-link">Already have an account?</a>
                 </div>
             
                 
