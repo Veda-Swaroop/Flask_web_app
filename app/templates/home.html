@@ -10,24 +10,30 @@
         </div>
         <div class="carousel-inner">
             <div class="carousel-item active" data-bs-interval="10000">
-            <img src="static/hgg.jpg" class="d-block w-50 mx-auto" alt="HGG">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>First slide label</h5>
-                <p>Some representative placeholder content for the first slide.</p>
+            <img src="{{ url_for('static', filename = 'images/carousal_brown.jpg') }}" class="d-block w-75 mx-auto" alt="Wuthering_Heights_book">
+            <div class="carousel-caption d-none d-md-block text-white" style="top: 30%; bottom: auto;">
+                <h5>Book Title    : Wuthering Heights</h5>
+                <p>Author         : Emily Bronte</p>
+                <p>Language       : English</p>
+                <p>Average Rating : 3.85</p>
             </div>
             </div>
             <div class="carousel-item" data-bs-interval="2000">
-            <img src="static/harry_potter.jpg" class="d-block w-50 mx-auto" alt="Harry Potter">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>Second slide label</h5>
-                <p>Some representative placeholder content for the second slide.</p>
+            <img src="{{ url_for('static', filename = 'images/carousal_green.jpg') }}" class="d-block w-75 mx-auto" alt="Harry_Potter_book">
+            <div class="carousel-caption d-none d-md-block text-white" style="top: 30%; bottom: auto;">
+                <h5>Book Title    : Harry Potter and the Order of the Phoenix</h5>
+                <p>Author         : J.K. Rowling</p>
+                <p>Language       : English</p>
+                <p>Average Rating : 4.49</p>
             </div>
             </div>
             <div class="carousel-item">
-            <img src="static/hgg.jpg" class="d-block w-50 mx-auto" alt="Test">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>Third slide label</h5>
-                <p>Some representative placeholder content for the third slide.</p>
+            <img src="{{ url_for('static', filename = 'images/carousal_orange.jpg') }}" class="d-block w-75 mx-auto" alt="Lord_of_the_Rings_book">
+            <div class="carousel-caption d-none d-md-block text-white" style="top: 30%; bottom: auto;">
+                <h5>Book Title    : The Lord of the Rings</h5>
+                <p>Author         : J.R.R. Tolkien</p>
+                <p>Langiage       : English</p>
+                <p>Average Rating : 4.5</p> 
             </div>
             </div>
         </div>
@@ -44,29 +50,96 @@
 
     <div class="container mt-4">
         <h3>Search Books</h3>
-        <input id="searchInput" class="form-control" type="search" placeholder="Type a Book name">
-        <ul id="results" class="list-group mt-2"></ul>
+        
+        <div style="position: relative;">
+            
+            <input id="searchInput" class="form-control" type="search" placeholder="Type a Book name" autocomplete="off">
+            
+
+            <ul id="results" class="list-group" style="position: absolute; width: 100%; z-index: 1000; display: none;">
+                
+            </ul>
+            
+        </div>
     </div>
 
-
-
-
-
+    <style>
+        
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    
+        #results {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-height: 300px; 
+            overflow-y: auto;
+        }
+    </style>
 
     <script>
-        let input = document.querySelector('input');
-        input.addEventListener('input', async function() {
-            let response = await fetch('/search?q=' + input.value);
-            let shows = await response.json();
-            let html = ''
-            for (let show of shows) {
-                html += '<li>' + show.title + '</li>';  
-            }
-            document.querySelector('ul').innerHTML = html;
-        })
+        let input = document.querySelector('#searchInput');
+        let ul = document.querySelector('#results');
 
+        // 1. The Search Listener (Same as before, but with data-id)
+        input.addEventListener('input', async function() {
+            if (!input.value) {
+                ul.style.display = 'none';
+                ul.innerHTML = '';
+                return;
+            }
+
+            let response = await fetch('/search?q=' + input.value);
+            let books = await response.json();
+            
+            let html = '';
+            for (let book of books) {
+                // MAGIC HAPPENS HERE: 
+                // We add a 'data-id' attribute to store the database ID hidden in the HTML
+                html += `<li class="list-group-item list-group-item-action" data-id="${book.id}">${book.title}</li>`;  
+            }
+
+            ul.innerHTML = html;
+            
+            // Toggle visibility
+            if (books.length > 0) {
+                ul.style.display = 'block';
+            } else {
+                ul.style.display = 'none';
+            }
+        });
+
+        // 2. The "Click" Listener (New Logic)
+        ul.addEventListener('click', function(e) {
+            // Check if the clicked element is an LI item
+            if (e.target && e.target.nodeName == "LI") {
+                
+                // A. Populate the search box with the clicked title
+                input.value = e.target.innerText;
+                
+                // B. Capture the Book ID (for the database)
+                let bookId = e.target.getAttribute('data-id');
+
+                // C. Hide the list
+                ul.style.display = 'none';
+
+                // D. FETCH THE DATA!
+                // You have two choices here:
+                
+                // Choice 1: Redirect to a Book Details page (Recommended)
+                window.location.href = '/book_details/' + bookId;
+
+            }
+        });
+
+        // 3. Hide list if clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== input && e.target !== ul) {
+                ul.style.display = 'none';
+            }
+        });
     </script>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
 {% endblock %}
