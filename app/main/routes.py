@@ -58,6 +58,7 @@ def add_to_cart(book_id):
 def check_cart():
     if "cart" not in session or session["cart"] == []:
         flash("No books in cart", "warning")
+        return render_template("cart.html")
 
     books = Book.query.filter(Book.bookID.in_(session["cart"]))
     return render_template("cart.html", books=books)
