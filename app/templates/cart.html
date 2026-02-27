@@ -16,12 +16,22 @@
     {% endwith %}
 </div>
 
+<div class="container mt-4">
 
+    <h1> Cart </h1>
+
+    <form action="{{ url_for('main.home') }}">
+        <button class="btn btn-primary btn-lg">&larr; Go Back</button>
+    </form>
+
+</div>
+
+
+{% for book in books %}
 
 
 <div class="container mt-5">
     <div class="row">
-        <!-- Left: Image (Placeholder since you don't have image URLs in DB) -->
         <div class="col-md-4">
 
             <img 
@@ -43,23 +53,27 @@
             <p><strong>ISBN:</strong> {{ book.isbn }}</p>
 
             <div class="d-flex gap-2 mt-3">
-                <form action="{{ url_for('main.add_to_cart', book_id=book.bookID) }}" method="post">
-                    <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+                <form action="{{ url_for('main.delete_from_cart', book_id=book.bookID) }}">
+                    <button type="submit" class="btn btn-primary btn-lg">Delete</button>
                 </form>
 
-                <form action="{{ url_for('main.home') }}">
-                    <button class="btn btn-primary btn-lg">&larr; Go Back</button>
-                </form>
-                
-                <form action="{{ url_for('main.check_cart') }}" method="post">
-                    <button class="btn btn-primary btn-lg"> Check cart </button>
-                </form>
+
+
 
             </div>
 
         </div>
     </div>
 </div>
+
+
+
+
+
+{% endfor %}
+
+
+
 
 
 {% endblock %}

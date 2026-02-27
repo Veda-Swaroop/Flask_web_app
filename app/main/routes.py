@@ -20,7 +20,7 @@ def home():
 def search():
     q = request.args.get("q", "").strip()
     if q:
-        results = Book.query.filter(Book.title.ilike(f"%{q}%")).limit(10).all()
+        results = Book.query.filter(Book.title.ilike(f"{q}%")).limit(10).all()
         titles = [{"id":book.bookID, "title":book.title} for book in results] 
     
     else:
@@ -51,3 +51,26 @@ def add_to_cart(book_id):
         flash("This book is already in your cart", "info")
 
     return redirect(url_for("main.book_details", id=book_id))
+
+
+@main.route("/check_cart", methods=["GET", "POST"])
+@login_required
+def check_cart():
+    if "cart" not in session or session["cart"] == []:
+        flash("No books in cart", "warning")
+
+    books = Book.query.filter(Book.bookID.in_(session["cart"]))
+    return render_template("cart.html", books=books)
+
+
+@main.route("/delete_from_cart/<int:book_id>")
+@login_required
+def delete_from_cart(book_id):
+    if "cart" not in session or session["cart"] == []:
+        flash("No books in cart!", "warning")
+    else:
+        cart = session.get("cart", [])
+        cart.remove(book_id)
+        session["cart"] = cart
+        flash("Book deleted!", "success")
+    return redirect("/check_cart")
