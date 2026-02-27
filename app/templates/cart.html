@@ -18,7 +18,7 @@
 
 <div class="container mt-4">
 
-    <h1> Cart </h1>
+    <h1> {{ current_user.username }}'s Cart </h1>
 
     <form action="{{ url_for('main.home') }}">
         <button class="btn btn-primary btn-lg">&larr; Go Back</button>
@@ -54,7 +54,7 @@
 
             <div class="d-flex gap-2 mt-3">
                 <form action="{{ url_for('main.delete_from_cart', book_id=book.bookID) }}">
-                    <button type="submit" class="btn btn-primary btn-lg">Delete</button>
+                    <button type="submit" class="btn btn-danger btn-lg">Delete</button>
                 </form>
 
 
