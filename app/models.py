@@ -13,6 +13,9 @@ class Users(UserMixin, db.Model):
         self.username=username
         self.password=password
         self.is_admin=is_admin
+    
+    def __repr__(self) -> str:
+        return f"<Users(id = {self.id}, username = {self.username}, password = {self.password}, is_admin = {self.is_admin})>"
 
 
 class Book(db.Model):
@@ -34,5 +37,15 @@ class Book(db.Model):
     publisher = db.Column(db.Text)
 
     def __repr__(self) -> str:
-        return f"<Book {self.bookID}: {self.title} by {self.authors}>"
+        return f"<Book(id={self.bookID}, title={self.title}, author={self.authors}, rating={self.average_rating})>"
+
+
+class Cart(db.Model):
+    __tablename__ = 'cart'
+
+    cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.bookID'), nullable=False)
+    
+
 

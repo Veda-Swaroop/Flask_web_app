@@ -76,6 +76,110 @@
         }
     </style>
 
+
+<div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <!-- Bootstrap Alert Div -->
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+</div>
+
+
+
+
+{% for book in books %}
+
+<div class="container mt-5">
+    <div class="row">
+       
+        <div class="col-md-4">
+
+            <img 
+            src="{{ url_for('static', filename='covers/' ~ book.isbn ~ '.jpg') }}" 
+            class="img-fluid rounded shadow w-50" 
+            alt="{{ book.title }}"
+            onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';"
+            >
+        </div>
+        <!-- Right: Book Details -->
+        <div class="col-md-8">
+            <h3>{{ book.title }}</h3>
+            <h5 class="text-muted">by {{ book.authors }}</h5>
+
+            <div class="d-flex gap-2 mt-3">
+
+                <form action="{{ url_for('main.add_to_cart', book_id=book.bookID) }}" method="post">
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
+
+                <form action="{{ url_for('main.book_details', book_id=book.bookID) }}" method="post">
+                    <button type="submit" class="btn btn-primary">Book details</button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+{% endfor %}
+
+<nav aria-label="Page navigation">
+<ul class="pagination">
+
+    {% if books.page in range(1, 11) %}
+    <li class="page-item disabled"><a class="page-link" href="{{ url_for('main.home', page=1) }}">First</a></li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=1) }}">First</a></li>
+    {% endif %}
+
+
+    {% if books.has_prev %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=books.prev_num) }}">Previous</a></li>
+    {% else %}
+    <li class="page-item disabled"><a class="page-link">Previous</a></li>
+    {% endif %}
+
+
+
+    {% for p in w_range %}
+        {% if p == books.page %}
+        <li class="page-item active"><a class="page-link" href="{{ url_for('main.home', page=p) }}">{{ p }}</a></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=p) }}">{{ p }}</a></li>
+        {% endif %}
+    {% endfor %}
+    
+
+    {% if books.has_next %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=books.next_num) }}">Next</a></li>
+    {% else %}
+    <li class="page-item disabled"><a class="page-link">Next</a></li>
+    {% endif %}
+
+
+    {% if books.page in range(books.pages - 10, books.pages + 1) %}
+    <li class="page-item disabled"><a class="page-link" href="{{ url_for('main.home', page=books.pages) }}">Last</a></li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=books.pages) }}">Last</a></li>
+    {% endif %}
+
+
+</ul>
+</nav>
+
+
+
+
     <script>
         let input = document.querySelector('#searchInput');
         let ul = document.querySelector('#results');
@@ -123,9 +227,8 @@
                 ul.style.display = 'none';
 
                 // D. FETCH THE DATA!
-                // You have two choices here:
                 
-                // Choice 1: Redirect to a Book Details page (Recommended)
+                // Redirect to a Book Details page
                 window.location.href = '/book_details/' + bookId;
 
             }

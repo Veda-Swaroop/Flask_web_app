@@ -20,9 +20,7 @@
 
     <h1> {{ current_user.username }}'s Cart </h1>
 
-    <form action="{{ url_for('main.home') }}">
-        <button class="btn btn-primary btn-lg">&larr; Go Back</button>
-    </form>
+    <a href="{{ request.referrer or url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
 
 </div>
 
@@ -30,21 +28,21 @@
 {% for book in books %}
 
 
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="row">
         <div class="col-md-4">
 
             <img 
             src="{{ url_for('static', filename='covers/' ~ book.isbn ~ '.jpg') }}" 
-            class="img-fluid rounded shadow" 
+            class="img-fluid rounded shadow w-50" 
             alt="{{ book.title }}"
             onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';"
             >
         </div>
         <!-- Right: Book Details -->
         <div class="col-md-8">
-            <h1>{{ book.title }}</h1>
-            <h4 class="text-muted">by {{ book.authors }}</h4>
+            <h3>{{ book.title }}</h3>
+            <h5 class="text-muted">by {{ book.authors }}</h5>
             <hr>
             
             <p><strong>Rating:</strong> {{ book.average_rating }} / 5 ({{ book.ratings_count }} votes)</p>
@@ -53,13 +51,9 @@
             <p><strong>ISBN:</strong> {{ book.isbn }}</p>
 
             <div class="d-flex gap-2 mt-3">
-                <form action="{{ url_for('main.delete_from_cart', book_id=book.bookID) }}">
-                    <button type="submit" class="btn btn-danger btn-lg">Delete</button>
+                <form action="{{ url_for('main.delete_from_cart', book_id=book.bookID) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
-
-
-
-
             </div>
 
         </div>

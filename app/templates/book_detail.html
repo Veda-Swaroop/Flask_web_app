@@ -26,7 +26,7 @@
 
             <img 
             src="{{ url_for('static', filename='covers/' ~ book.isbn ~ '.jpg') }}" 
-            class="img-fluid rounded shadow" 
+            class="img-fluid rounded shadow w-75" 
             alt="{{ book.title }}"
             onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';"
             >
@@ -44,17 +44,11 @@
 
             <div class="d-flex gap-2 mt-3">
                 <form action="{{ url_for('main.add_to_cart', book_id=book.bookID) }}" method="post">
-                    <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
                 </form>
 
-                <form action="{{ url_for('main.home') }}">
-                    <button class="btn btn-primary btn-lg">&larr; Go Back</button>
-                </form>
+                <a href="{{ request.referrer or url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
                 
-                <form action="{{ url_for('main.check_cart') }}" method="post">
-                    <button class="btn btn-primary btn-lg"> Check cart </button>
-                </form>
-
             </div>
 
         </div>
