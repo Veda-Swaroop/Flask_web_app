@@ -2,23 +2,6 @@
 
 {% block body %}
 
-<div class="container mt-3">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <!-- Bootstrap Alert Div -->
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-</div>
-
-
-
-
 <div class="container mt-5">
     <div class="row">
         <!-- Left: Image (Placeholder since you don't have image URLs in DB) -->
@@ -47,7 +30,8 @@
                     <button type="submit" class="btn btn-primary">Add to Cart</button>
                 </form>
 
-                <a href="{{ request.referrer or url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
+                <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
+ 
                 
             </div>
 

@@ -2,20 +2,6 @@
 
 {% block body %}
 
-<div class="container mt-3">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <!-- Bootstrap Alert Div -->
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-</div>
-
 <div class="container mt-4">
 
     <h1> {{ current_user.username }}'s Cart </h1>
@@ -28,7 +14,7 @@
 {% for item in cart %}
 
 
-<div class="container mt-4">
+<div class="container my-4 mb-5">
     <div class="row">
         <div class="col-md-4">
 
