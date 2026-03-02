@@ -70,8 +70,8 @@ def register():
         
         
         user = Users(
-            username = usr_name,
-            password = generate_password_hash(pwd)
+            username = usr_name,                     #type:ignore
+            password = generate_password_hash(pwd)   #type:ignore
         )
 
         db.session.add(user)

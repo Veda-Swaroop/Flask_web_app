@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, session, flash, redirect, url_for
 from flask_login import current_user, login_required
+from app.extensions import db
 
-from app.models import Book
+from app.models import Book, Cart
 
 main = Blueprint("main", __name__)
 
@@ -57,38 +58,46 @@ def book_details(book_id):
 @main.route("/add_to_cart/<int:book_id>", methods=["GET","POST"])
 @login_required
 def add_to_cart(book_id):
-    if "cart" not in session:
-        session["cart"] = []
-
-    if book_id not in session["cart"]:
-        session["cart"].append(book_id)
-        session.modified = True
-        flash("Book added to cart successfully", "success")
+    cart_item = Cart.query.filter_by(user_id = current_user.id, book_id=book_id).first()
+    if cart_item:
+        cart_item.quantity += 1
+        flash("Updated quantity for book", "info")
     else:
-        flash("This book is already in your cart", "info")
+        new_item = Cart(user_id=current_user.id, book_id=book_id) #type: ignore
+        db.session.add(new_item)
+        flash("Book added to cart!", "success")
 
+    db.session.commit()
     return redirect(request.referrer)
 
 
 @main.route("/check_cart", methods=["GET", "POST"])
 @login_required
 def check_cart():
-    if "cart" not in session or session["cart"] == []:
+    user_cart = current_user.cart_items
+
+    if not user_cart:
         flash("No books in cart", "warning")
         return render_template("cart.html")
 
-    books = Book.query.filter(Book.bookID.in_(session["cart"]))
-    return render_template("cart.html", books=books)
+    return render_template("cart.html", cart=user_cart)
 
 
 @main.route("/delete_from_cart/<int:book_id>", methods=["POST"])
 @login_required
 def delete_from_cart(book_id):
-    if "cart" not in session or session["cart"] == []:
-        flash("No books in cart!", "warning")
+    
+    cart_item = Cart.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+    if cart_item:
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+        else:
+            db.session.delete(cart_item)
+            
+        db.session.commit()
+        flash("Book deleted from cart!", "info")
     else:
-        cart = session.get("cart", [])
-        cart.remove(book_id)
-        session["cart"] = cart
-        flash("Book deleted!", "success")
+        flash("Book not found in cart", "warning")
+
+
     return redirect("/check_cart")

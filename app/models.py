@@ -3,16 +3,14 @@ from flask_login import UserMixin
 
 
 class Users(UserMixin, db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
-
-    def __init__(self, username, password, is_admin=False):
-        self.username=username
-        self.password=password
-        self.is_admin=is_admin
+    cart_items = db.relationship("Cart", back_populates="user")
     
     def __repr__(self) -> str:
         return f"<Users(id = {self.id}, username = {self.username}, password = {self.password}, is_admin = {self.is_admin})>"
@@ -21,7 +19,7 @@ class Users(UserMixin, db.Model):
 class Book(db.Model):
     __tablename__ = 'books'
 
-    __bind_key__ = 'books_db'
+    # __bind_key__ = 'books_db'
 
     bookID = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text)
@@ -36,16 +34,24 @@ class Book(db.Model):
     publication_date = db.Column(db.Text)
     publisher = db.Column(db.Text)
 
+    cart_items = db.relationship("Cart", back_populates="book")
+
     def __repr__(self) -> str:
         return f"<Book(id={self.bookID}, title={self.title}, author={self.authors}, rating={self.average_rating})>"
 
 
 class Cart(db.Model):
-    __tablename__ = 'cart'
+    __tablename__ = 'cart_items'
 
-    cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('books.bookID'), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+
+    user = db.relationship("Users", back_populates="cart_items")
+    book = db.relationship("Book", back_populates="cart_items")
+
+    __table__args__ = (db.UniqueConstraint('user_id', 'book_id', name='_user_book_uc'),)
     
 
 

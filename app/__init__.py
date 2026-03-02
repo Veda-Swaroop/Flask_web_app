@@ -13,7 +13,7 @@ def create_app():
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_TYPE"] = "filesystem"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
-    app.config["SQLALCHEMY_BINDS"] = {'books_db': f"sqlite:///books.db"}
+    # app.config["SQLALCHEMY_BINDS"] = {'books_db': f"sqlite:///books.db"}
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = "some_random_secret"
 
