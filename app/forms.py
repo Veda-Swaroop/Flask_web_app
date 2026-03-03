@@ -1,0 +1,137 @@
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, ValidationError
+from wtforms.validators import InputRequired, Length, Regexp, EqualTo
+from app.models import Users 
+
+class LoginForm(FlaskForm):
+    username = StringField(
+        validators=[
+            InputRequired(message="Username is required."),
+            Length(min=4, max=20, message="Username must be at least 4 characters."),
+            Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "autofocus": True,
+            "placeholder": "Username",
+            "pattern": "^[a-zA-Z0-9_]+$" # Frontend validation for pattern
+        }
+    )
+
+    password = PasswordField(
+        validators=[
+            InputRequired(message="Password is required."),
+            Length(min=4, max=20, message="Password must be at least 4 characters.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "placeholder": "Password"
+        }
+    )
+
+    submit = SubmitField(
+        "Login",
+        render_kw={"class": "btn btn-primary"}
+    )
+
+
+
+class RegisterForm(FlaskForm):
+    username = StringField(
+        validators=[
+            InputRequired(message="Username is required."),
+            Length(min=4, max=20, message="Username must be at least 4 characters."),
+            Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "autofocus": True,
+            "placeholder": "Enter Username",
+            "pattern": "^[a-zA-Z0-9_]+$" # Frontend validation for pattern
+        }
+    )
+
+    password = PasswordField(
+        validators=[
+            InputRequired(message="Password is required."),
+            Length(min=4, max=20, message="Password must be at least 4 characters.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "placeholder": "Enter Password"
+        }
+    )
+
+    submit = SubmitField(
+        "Register",
+        render_kw={"class": "btn btn-primary"}
+    )
+
+    def validate_username(self, username):
+        existing_user = Users.query.filter_by(username=username.data).first()
+        if existing_user:
+            raise ValidationError("Username already exist. Please choose another")
+        
+
+
+class VerifyForm(FlaskForm):
+
+    username = StringField(
+        validators=[
+            InputRequired(message="Username is required."),
+            Length(min=4, max=20, message="Username must be at least 4 characters."),
+            Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "autofocus": True,
+            "placeholder": "Enter Username",
+            "pattern": "^[a-zA-Z0-9_]+$" # Frontend validation for pattern
+        }
+    )
+
+    submit = SubmitField(
+        "Submit",
+        render_kw={"class": "btn btn-primary"}
+    )
+
+
+class ResetForm(FlaskForm):
+
+    new_password = PasswordField(
+        validators=[
+            InputRequired(message="Password is required."),
+            Length(min=4, max=20, message="Password must be at least 4 characters.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "autofocus": True,
+            "placeholder": "Enter Password"
+        }
+    )
+
+    confirm_password = PasswordField(
+        validators=[
+            InputRequired(message="Password is required."),
+            EqualTo("new_password", message="Passwords must match!"),
+            Length(min=4, max=20, message="Password must be at least 4 characters.")
+        ],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "autofocus": True,
+            "placeholder": "Confirm Password"
+        }
+    )
+
+
+    submit = SubmitField(
+        "Submit",
+        render_kw={"class": "btn btn-primary"}
+    )

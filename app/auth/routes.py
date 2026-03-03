@@ -1,27 +1,31 @@
-from flask import Blueprint, render_template, request, session, redirect, flash, url_for
+from flask import Blueprint, render_template, session, redirect, flash, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required
 from app.extensions import db
 from app.models import Users
+from app.forms import LoginForm, RegisterForm, ResetForm, VerifyForm
 
 auth = Blueprint("auth", __name__)
 
+
+@auth.route("/")
+def index():
+    form = LoginForm()
+    return render_template("index.html", form=form)
+
+
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
+    form = LoginForm()
+    
+    if form.validate_on_submit():
 
-        usr_name = request.form.get("username")
-        pwd = request.form.get("password")
+        usr_name = form.username.data
+        pwd = form.password.data
 
         if not usr_name or not pwd:
             flash("Enter username and password", "danger")
             return redirect(url_for("auth.login"))
-        
-        if len(usr_name) < 3:
-            flash("username must be atleast 3 characters", "warning")
-        
-        if len(pwd) < 4:
-            flash("password must be atleast 4 characters", "warning")
         
         user = Users.query.filter_by(username=usr_name).first()
 
@@ -34,9 +38,10 @@ def login():
             return redirect(url_for("main.home"))
             
         flash("Invalid Username or Password!", "danger")
-        return redirect(url_for("auth.login"))    
-        
-    return render_template("index.html")
+           
+    return render_template("index.html", form=form)
+
+
 
 # Logout Route
 @auth.route("/logout")
@@ -46,29 +51,19 @@ def logout():
     flash("You have successfully logged out!", "success")
     return render_template("logout.html")
 
+
+
+
 # Register Route
 @auth.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
+    form = RegisterForm()
 
-        usr_name = request.form.get("username")
-        pwd = request.form.get("password")
+    if form.validate_on_submit():
 
-        if not usr_name or len(usr_name) < 3:
-            flash("username must be atleast 3 characters", "warning")
-            return redirect(url_for("auth.register"))
-
-        if not pwd or len(pwd) < 4:
-            flash("password must be atleast 4 characters", "warning")
-            return redirect(url_for("auth.register"))
-            
-
-        existing = Users.query.filter_by(username=usr_name).first()
-        if existing:
-            flash("Username already exists!", "danger")
-            return redirect(url_for("auth.register"))
-        
-        
+        usr_name = form.username.data
+        pwd = form.password.data
+ 
         user = Users(
             username = usr_name,                     #type:ignore
             password = generate_password_hash(pwd)   #type:ignore
@@ -80,59 +75,66 @@ def register():
         flash("Account created successfully!", "success")
         return redirect(url_for("auth.login"))
 
-    return render_template("register.html")
+    return render_template("register.html", form=form)
+
+
 
 # Verify Route
 @auth.route("/verify", methods=["GET", "POST"])
 def verify():
-    if request.method == "POST":
-        usr_name = request.form.get("username")
+    form = VerifyForm()
 
-        if not usr_name:
-            flash("Enter Username!", "warning")
-            return redirect(url_for("auth.verify"))
+    if form.validate_on_submit():
+
+        usr_name = form.username.data
 
         user = Users.query.filter_by(username=usr_name).first()
     
         if user and usr_name != "admin":
-            return render_template("reset.html", user_id=user.id)
+            session["reset_user_id"] = user.id
+            return redirect(url_for("auth.reset"))
+        
         else:
             flash("Invalid Username", "danger")
-            return redirect(url_for("auth.verify"))
             
-    return render_template("verify.html")
+            
+    return render_template("verify.html", form=form)
+
+
 
 # Reset Route
 @auth.route("/reset", methods=["GET", "POST"])
 def reset():
-
-    if request.method == "POST":
-        user_id = request.form.get("user_id")
-        new_pwd = request.form.get("new_password")
-        confirm_pwd = request.form.get("confirm_password")
-
-        if not user_id:
-            flash("Verify your account!", "danger")
-            return redirect(url_for("auth.verify"))
-
-        if not new_pwd or not confirm_pwd:
-            flash("Enter new password and confirm password", "warning")
-            return redirect(url_for("auth.reset"))
-
-        if new_pwd != confirm_pwd:
-            flash("Passwords do not match!", "danger")
-            return render_template("reset.html", user_id=user_id)
-       
-        user = Users.query.get(int(user_id))
         
-        if not user:
-            flash("Invalid user, Please verify!", "danger")
-            return redirect(url_for("auth.verify"))
-        
-        user.password = generate_password_hash(new_pwd)
-        db.session.commit()
-
-        flash("Password reset successful!", "success")
-        return redirect(url_for("auth.login"))
+    if "reset_user_id" not in session:
+        flash("Please verify your account!", "danger")
+        return redirect(url_for("auth.verify"))
     
-    return render_template("reset.html")
+    
+    form = ResetForm()
+
+    if form.validate_on_submit():
+
+        new_pwd = form.new_password.data or ""
+        user_id = session.get("reset_user_id")
+
+        if user_id is None:
+            flash("Session expired. Please verify again.", "danger")
+            return redirect(url_for("auth.verify"))
+
+        user = Users.query.get(int(user_id))
+
+        if user:
+            user.password = generate_password_hash(new_pwd)
+            db.session.commit()
+
+            session.pop("reset_user_id", None)
+
+            flash("Password reset successful!", "success")
+            return redirect(url_for("auth.login"))
+        
+        else:
+            flash("Invalid user. Please verify again.", "danger")
+            return redirect(url_for("auth.verify"))
+
+    return render_template("reset.html", form=form)

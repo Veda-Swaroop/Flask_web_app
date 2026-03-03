@@ -11,16 +11,37 @@
                 <div class="card-body">
                     <h5 class="card-title">Login</h5>
                     <form action="{{ url_for('auth.login') }}" method="post">
+                        {{ form.hidden_tag() }}
 
                         <div class="mb-3">
-                            <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Username" name="username" required minlength="3" pattern="^[a-zA-Z0-9_]+$">
+                            {{ form.username() }}
+
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                            <!--
+                            <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Username" name="username" required minlength="4" pattern="^[a-zA-Z0-9_]+$">
+                            -->
+                            
                         </div>
 
                         <div class="mb-3">
-                            <input type="password" class="form-control" autocomplete="off" placeholder="password" name="password" required minlength="4">
+                            {{ form.password() }}
+
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                            <!--
+                             <input type="password" class="form-control" autocomplete="off" placeholder="password" name="password" required minlength="4">
+                            -->
+                           
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Login</button>
+                        <!--
+                         <button type="submit" class="btn btn-primary">Login</button>
+                        -->
+                       {{ form.submit() }}
+
                     </form>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}

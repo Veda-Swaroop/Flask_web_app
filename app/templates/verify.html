@@ -9,12 +9,25 @@
             <h5 class="card-title">Let's verify your account</h5>
 
             <form action="{{ url_for('auth.verify') }}" method="post">
+                {{ form.hidden_tag() }}
 
                 <div class="mb-3">
+                    {{ form.username() }}
+
+                    {% for error in form.username.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                    <!--
                     <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Enter username" name="username" required>
+                    -->
+                    
                 </div>
 
+                <!--
                 <button type="submit" class="btn btn-primary">Submit</button>
+                -->
+                {{ form.submit() }}
+
             </form>
 
             {% with messages = get_flashed_messages(with_categories=true) %}

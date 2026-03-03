@@ -7,9 +7,6 @@ from app.models import Book, Cart
 
 main = Blueprint("main", __name__)
 
-@main.route("/")
-def index():
-    return render_template("index.html")
 
 @main.route("/home")
 @login_required
@@ -47,6 +44,8 @@ def search():
     return jsonify(titles)
 
 
+
+
 @main.route("/book_details/<int:book_id>", methods=["GET", "POST"])
 @login_required
 def book_details(book_id):
@@ -78,7 +77,7 @@ def add_to_cart(book_id):
         flash(f" Book: '{short_title}' Added to cart", "success")
     
     db.session.commit()
-    return redirect(request.referrer if request.referrer else url_for("main.home"))
+    return redirect(request.referrer or url_for("main.home"))
 
 
 @main.route("/check_cart", methods=["GET", "POST"])
