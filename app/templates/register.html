@@ -17,30 +17,20 @@
                     {% for error in form.username.errors %}
                         <div class="text-danger small mt-1">{{ error }}</div>
                     {% endfor %}
-
-                    <!--
-                    <input type="text" class="form-control" name = "username" placeholder="Enter Username" autofocus required minlength="4" maxlength="20" pattern="^[a-zA-Z0-9_]+$">
-                    -->
                     
                 </div>
 
                 <div class="mb-3">
                     {{ form.password() }}
 
-                    {% for error in form.username.errors %}
+                    {% for error in form.password.errors %}
                         <div class="text-danger small mt-1">{{ error }}</div>
                     {% endfor %}
-
-                    <!--
-                    <input type="password" class="form-control" name="password" placeholder="Enter Password" required minlength="4" maxlength="20">
-                    -->
                     
                 </div>
                 
                 <div>
-                    <!--
-                    <button type="submit" class="btn btn-primary">Register</button>
-                    -->
+
                     {{ form.submit() }}
 
                 </div>

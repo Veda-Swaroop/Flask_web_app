@@ -55,29 +55,37 @@ def book_details(book_id):
 
 
 
-@main.route("/add_to_cart/<int:book_id>", methods=["GET","POST"])
+@main.route("/add_to_cart/<int:book_id>", methods=["POST"])
 @login_required
 def add_to_cart(book_id):
-    cart_item = Cart.query.filter_by(user_id = current_user.id, book_id=book_id).first()
+    
     book = Book.query.get(book_id)
 
     if not book:
-        flash("Book not found", "danger")
-        return redirect(request.referrer)
+        return jsonify({"status": "error", "message": "Book not found"}), 404
+    
+    cart_item = Cart.query.filter_by(user_id = current_user.id, book_id=book_id).first()
     
     title = book.title
     short_title = textwrap.shorten(title,width=30, placeholder="...." )
     
     if cart_item:
         cart_item.quantity += 1
-        flash(f"Updated quantity for Book: '{short_title}' ", "info")
+        message = f"Updated quantity for Book: '{short_title}'"
+        category = "info"
     else:
         new_item = Cart(user_id=current_user.id, book_id=book_id) #type: ignore
         db.session.add(new_item)
-        flash(f" Book: '{short_title}' Added to cart", "success")
+        message = f" Book: '{short_title}' Added to cart"
+        category = "success"
     
     db.session.commit()
-    return redirect(request.referrer or url_for("main.home"))
+    # return redirect(request.referrer or url_for("main.home"))
+    return jsonify({
+        "status": "success",
+        "message": message,
+        "category": category,
+    }), 200
 
 
 @main.route("/check_cart", methods=["GET", "POST"])
@@ -95,30 +103,38 @@ def check_cart():
 @main.route("/delete_from_cart/<int:book_id>", methods=["POST"])
 @login_required
 def delete_from_cart(book_id):
-    
-    cart_item = Cart.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-    book = Book.query.get(book_id)
 
-    if not book:
-        flash("Book not found", "danger")
-        return redirect("/check_cart")
+    cart_item = Cart.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        
+    if not cart_item:
+        return jsonify({"status": "error", "message": "Item not found in cart"}), 404
     
+    book = Book.query.get(book_id)
     title = book.title #type:ignore
     short_title = textwrap.shorten(title,width=30, placeholder="...." )
 
-    if cart_item:
-        if cart_item.quantity > 1:
-            cart_item.quantity -= 1
-        else:
-            db.session.delete(cart_item)
-
-        flash(f" Book: '{short_title}' Deleted from cart", "info")
+    if cart_item.quantity > 1:
+        cart_item.quantity -= 1
         db.session.commit()
+        return jsonify({
+            "status": "success",
+            "action": "decremented",
+            "new_quantity": cart_item.quantity,
+            "message": f"Decreased quanity for '{short_title}'",
+            "category": "info",
+        }), 200
+
+
     else:
-        flash(f" Book: '{short_title}' not found in cart", "warning")
+        db.session.delete(cart_item)
+        db.session.commit()
 
-
-    return redirect("/check_cart")
+        return jsonify({
+            "status": "success",
+            "action": "removed",
+            "message": f"Removed '{short_title}' from cart",
+            "category": "success",
+        }), 200
 
 
 

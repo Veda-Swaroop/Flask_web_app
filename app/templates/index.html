@@ -19,9 +19,6 @@
                             {% for error in form.username.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
-                            <!--
-                            <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Username" name="username" required minlength="4" pattern="^[a-zA-Z0-9_]+$">
-                            -->
                             
                         </div>
 
@@ -31,15 +28,10 @@
                             {% for error in form.password.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
-                            <!--
-                             <input type="password" class="form-control" autocomplete="off" placeholder="password" name="password" required minlength="4">
-                            -->
                            
                         </div>
 
-                        <!--
-                         <button type="submit" class="btn btn-primary">Login</button>
-                        -->
+
                        {{ form.submit() }}
 
                     </form>

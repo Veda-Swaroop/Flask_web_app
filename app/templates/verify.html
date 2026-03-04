@@ -17,15 +17,9 @@
                     {% for error in form.username.errors %}
                         <div class="text-danger small mt-1">{{ error }}</div>
                     {% endfor %}
-                    <!--
-                    <input type="text" class="form-control" autocomplete="off" autofocus placeholder="Enter username" name="username" required>
-                    -->
                     
                 </div>
 
-                <!--
-                <button type="submit" class="btn btn-primary">Submit</button>
-                -->
                 {{ form.submit() }}
 
             </form>

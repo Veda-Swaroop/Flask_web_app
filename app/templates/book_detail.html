@@ -2,42 +2,44 @@
 
 {% block body %}
 
-<div class="container mt-5">
-    <div class="row">
-        <!-- Left: Image (Placeholder since you don't have image URLs in DB) -->
-        <div class="col-md-4">
-
-            <img 
-            src="{{ url_for('static', filename='covers/' ~ book.isbn ~ '.jpg') }}" 
-            class="img-fluid rounded shadow w-75" 
-            alt="{{ book.title }}"
-            onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';"
-            >
-        </div>
-        <!-- Right: Book Details -->
-        <div class="col-md-8">
-            <h1>{{ book.title }}</h1>
-            <h4 class="text-muted">by {{ book.authors }}</h4>
-            <hr>
+    <div class="container mt-5">
+        <div class="row">
             
-            <p><strong>Rating:</strong> {{ book.average_rating }} / 5 ({{ book.ratings_count }} votes)</p>
-            <p><strong>Publisher:</strong> {{ book.publisher }} ({{ book.publication_date }})</p>
-            <p><strong>Pages:</strong> {{ book.num_pages }}</p>
-            <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+            <div class="col-md-4">
 
-            <div class="d-flex gap-2 mt-3">
-                <form action="{{ url_for('main.add_to_cart', book_id=book.bookID) }}" method="post">
-                    <button type="submit" class="btn btn-primary">Add to Cart</button>
-                </form>
-
-                <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
- 
-                
+                <img 
+                src="{{ url_for('static', filename='covers/' ~ book.isbn ~ '.jpg') }}" 
+                class="img-fluid rounded shadow w-75" 
+                alt="{{ book.title }}"
+                onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';"
+                >
             </div>
+            <!-- Right: Book Details -->
+            <div class="col-md-8">
+                <h1>{{ book.title }}</h1>
+                <h4 class="text-muted">by {{ book.authors }}</h4>
+                <hr>
+                
+                <p><strong>Rating:</strong> {{ book.average_rating }} / 5 ({{ book.ratings_count }} votes)</p>
+                <p><strong>Publisher:</strong> {{ book.publisher }} ({{ book.publication_date }})</p>
+                <p><strong>Pages:</strong> {{ book.num_pages }}</p>
+                <p><strong>ISBN:</strong> {{ book.isbn }}</p>
 
+                <div class="d-flex gap-2 mt-3">
+                    <form action="{{ url_for('main.add_to_cart', book_id=book.bookID) }}" method="post" class="add_to_cart_form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    </form>
+
+                    <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
+    
+                    
+                </div>
+
+            </div>
         </div>
     </div>
-</div>
+
 
 
 {% endblock %}

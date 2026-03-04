@@ -2,53 +2,48 @@
 
 {% block body %}
 
-<div class="container mt-4">
+    <div class="container mt-4">
 
-    <h1> {{ current_user.username }}'s Cart </h1>
+        <h1> {{ current_user.username }}'s Cart </h1>
 
-    <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
+        <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
 
-</div>
+    </div>
 
 
 {% for item in cart %}
 
 
-<div class="container my-4 mb-5">
-    <div class="row">
-        <div class="col-md-4">
+    <div class="container cart-item my-4 mb-5">
+        <div class="row">
+            <div class="col-md-4">
 
-            <img 
-            src="{{ url_for('static', filename='covers/' ~ item.book.isbn ~ '.jpg') }}" 
-            class="img-fluid rounded shadow w-50" 
-            alt="{{ item.book.title }}"
-            onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ item.book.title | urlencode }}';"
-            >
-        </div>
-        <!-- Right: Book Details -->
-        <div class="col-md-8">
-            <h3>{{ item.book.title }}</h3>
-            <h5 class="text-muted">by {{ item.book.authors }}</h5>
-            <hr>
-            
-            <p><strong>Rating:</strong> {{ item.book.average_rating }} / 5 ({{ item.book.ratings_count }} votes)</p>
-            <!--
-            <p><strong>Publisher:</strong> {{ item.book.publisher }} ({{ item.book.publication_date }})</p>
-            <p><strong>Pages:</strong> {{ item.book.num_pages }}</p>
-            <p><strong>ISBN:</strong> {{ item.book.isbn }}</p>
-            -->
-
-            <p><strong>Quantity:</strong> {{ item.quantity }}</p>
-
-            <div class="d-flex gap-2 mt-3">
-                <form action="{{ url_for('main.delete_from_cart', book_id=item.book.bookID) }}" method="post">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
+                <img 
+                src="{{ url_for('static', filename='covers/' ~ item.book.isbn ~ '.jpg') }}" 
+                class="img-fluid rounded shadow w-50" 
+                alt="{{ item.book.title }}"
+                onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ item.book.title | urlencode }}';"
+                >
             </div>
+            <!-- Right: Book Details -->
+            <div class="col-md-8">
+                <h3>{{ item.book.title }}</h3>
+                <h5 class="text-muted">by {{ item.book.authors }}</h5>
+                <hr>
+                
+                <p><strong>Rating:</strong> {{ item.book.average_rating }} / 5 ({{ item.book.ratings_count }} votes)</p>
+                <p><strong>Quantity:</strong> <span class="item-quantity">{{ item.quantity }}</span></p>
 
+                <div class="d-flex gap-2 mt-3">
+                    <form action="{{ url_for('main.delete_from_cart', book_id=item.book.bookID) }}" method="post" class="delete_from_cart_form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+
+            </div>
         </div>
     </div>
-</div>
 
 
 

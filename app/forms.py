@@ -7,7 +7,7 @@ class LoginForm(FlaskForm):
     username = StringField(
         validators=[
             InputRequired(message="Username is required."),
-            Length(min=4, max=20, message="Username must be at least 4 characters."),
+            Length(min=4, max=30, message="Username must be at least 4 characters."),
             Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
         ],
         render_kw={
@@ -15,14 +15,13 @@ class LoginForm(FlaskForm):
             "autocomplete": "off",
             "autofocus": True,
             "placeholder": "Username",
-            "pattern": "^[a-zA-Z0-9_]+$" # Frontend validation for pattern
         }
     )
 
     password = PasswordField(
         validators=[
             InputRequired(message="Password is required."),
-            Length(min=4, max=20, message="Password must be at least 4 characters.")
+            Length(min=4, max=30, message="Password must be at least 4 characters.")
         ],
         render_kw={
             "class": "form-control",
@@ -42,7 +41,7 @@ class RegisterForm(FlaskForm):
     username = StringField(
         validators=[
             InputRequired(message="Username is required."),
-            Length(min=4, max=20, message="Username must be at least 4 characters."),
+            Length(min=4, max=30, message="Username must be at least 4 characters."),
             Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
         ],
         render_kw={
@@ -50,14 +49,13 @@ class RegisterForm(FlaskForm):
             "autocomplete": "off",
             "autofocus": True,
             "placeholder": "Enter Username",
-            "pattern": "^[a-zA-Z0-9_]+$" # Frontend validation for pattern
         }
     )
 
     password = PasswordField(
         validators=[
             InputRequired(message="Password is required."),
-            Length(min=4, max=20, message="Password must be at least 4 characters.")
+            Length(min=4, max=30, message="Password must be at least 4 characters.")
         ],
         render_kw={
             "class": "form-control",
@@ -83,7 +81,7 @@ class VerifyForm(FlaskForm):
     username = StringField(
         validators=[
             InputRequired(message="Username is required."),
-            Length(min=4, max=20, message="Username must be at least 4 characters."),
+            Length(min=4, max=30, message="Username must be at least 4 characters."),
             Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
         ],
         render_kw={
@@ -91,7 +89,6 @@ class VerifyForm(FlaskForm):
             "autocomplete": "off",
             "autofocus": True,
             "placeholder": "Enter Username",
-            "pattern": "^[a-zA-Z0-9_]+$" # Frontend validation for pattern
         }
     )
 
@@ -106,7 +103,7 @@ class ResetForm(FlaskForm):
     new_password = PasswordField(
         validators=[
             InputRequired(message="Password is required."),
-            Length(min=4, max=20, message="Password must be at least 4 characters.")
+            Length(min=4, max=30, message="Password must be at least 4 characters.")
         ],
         render_kw={
             "class": "form-control",
@@ -120,7 +117,7 @@ class ResetForm(FlaskForm):
         validators=[
             InputRequired(message="Password is required."),
             EqualTo("new_password", message="Passwords must match!"),
-            Length(min=4, max=20, message="Password must be at least 4 characters.")
+            Length(min=4, max=30, message="Password must be at least 4 characters.")
         ],
         render_kw={
             "class": "form-control",

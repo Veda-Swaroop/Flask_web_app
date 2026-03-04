@@ -3,13 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title> Online Book Store  </title>
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
         <style>
             .toast-container {
-            top: 70px; /* adjust based on navbar height */
+            top: 70px; 
             }
         </style>
 
@@ -75,6 +76,141 @@
         const toastList = toastElList.map(function (toastEl) {
             return new bootstrap.Toast(toastEl).show()
         })
+
+
+        // --- ADD TO CART AJAX LOGIC ---
+        
+        // 1. Select all 'Add to Cart' forms on the page
+        const addToCartForms = document.querySelectorAll('.add_to_cart_form');
+
+        addToCartForms.forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                // Prevent the default form submission (which causes the page reload)
+                e.preventDefault(); 
+
+                const url = this.action;
+                const formData = new FormData(this); // Captures the CSRF token automatically
+
+                try {
+                    // Send an asynchronous POST request to your Flask route
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' // Lets Flask know it's an AJAX request
+                        }
+                    });
+
+                    // Parse the JSON response returned by your add_to_cart route
+                    const data = await response.json();
+
+                    // Determine the Bootstrap color category (e.g., success, info, danger)
+                    // If your backend returns 'error' as a status but no category, default to 'danger'
+                    const category = data.category || (data.status === 'error' ? 'danger' : 'success');
+
+                    // Show the dynamic toast
+                    showDynamicToast(data.message, category);
+
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    showDynamicToast('An unexpected error occurred.', 'danger');
+                }
+            });
+        });
+
+        // 2. Function to create and display a Toast dynamically
+        function showDynamicToast(message, category) {
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) return;
+
+            // Build the HTML structure identical to your layout.html flashes
+            const toastHTML = `
+                <div class="toast align-items-center text-bg-${category} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+            // Append the new toast to the existing toast container
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+            // Select the newly added toast element
+            const newToastElement = toastContainer.lastElementChild;
+
+            // Initialize and show the toast using Bootstrap's JS API
+            const toast = new bootstrap.Toast(newToastElement);
+            toast.show();
+
+            // Clean up: Remove the toast from the DOM after it has faded out
+            newToastElement.addEventListener('hidden.bs.toast', () => {
+                newToastElement.remove();
+            });
+        }
+
+        // --- DELETE FROM CART AJAX LOGIC ---
+        
+        const deleteFromCartForms = document.querySelectorAll('.delete_from_cart_form');
+
+        deleteFromCartForms.forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault(); 
+
+                const url = this.action;
+                const formData = new FormData(this);
+                const currentForm = this;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        // 1. Find the closest container with the class 'cart-item'
+                        const itemContainer = currentForm.closest('.cart-item');
+
+                        if (data.action === 'decremented') {
+                            // Only update the quantity text on the screen
+                            const quantitySpan = itemContainer.querySelector('.item-quantity');
+                            if (quantitySpan) {
+                                quantitySpan.textContent = data.new_quantity;
+                            }
+                        } 
+                        else if (data.action === 'removed') {
+                            // Completely remove the item from the screen
+                            if (itemContainer) {
+                                itemContainer.style.transition = "opacity 0.3s ease";
+                                itemContainer.style.opacity = 0;
+                                setTimeout(() => itemContainer.remove(), 300);
+                            }
+                        }
+                        
+                        // 3. Show the dynamic toast
+                        showDynamicToast(data.message, data.category);
+                        
+                    } else {
+                        // Handle server-side errors (e.g., item not found)
+                        showDynamicToast(data.message, 'danger');
+                    }
+
+                } catch (error) {
+                    console.error('Error deleting from cart:', error);
+                    showDynamicToast('An unexpected error occurred.', 'danger');
+                }
+            });
+        });
+
+
+
         </script>
 
 

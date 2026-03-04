@@ -1,31 +1,39 @@
 from flask import Flask, flash, redirect, url_for
+from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from app.extensions import db
 from app.models import Users
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+csrf = CSRFProtect()
+login_manager = LoginManager()
 
 
 
 def create_app():
     app = Flask(__name__)
-
+   
     # Config
-    app.config["SESSION_PERMANENT"] = False
-    app.config["SESSION_TYPE"] = "filesystem"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
-    # app.config["SQLALCHEMY_BINDS"] = {'books_db': f"sqlite:///books.db"}
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.secret_key = "some_random_secret"
+    app.secret_key = os.getenv("SECRET_KEY")
 
 
     # init extensions
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = "login" #type:ignore
+    csrf.init_app(app)
     db.init_app(app)
 
+    login_manager.init_app(app)
+    login_manager.login_view = "auth.login" #type:ignore
+    login_manager.login_message = "Please login first!"
+    login_manager.login_message_category = "warning"
 
-    # register routes
+
+
+    # register blueprints
     from app.main import main
     from app.auth import auth
     from app.admin import admin
@@ -44,13 +52,6 @@ def create_app():
     def load_user(user_id):
         return Users.query.get(int(user_id))
     
-    # handle unauthorized login
-    @login_manager.unauthorized_handler
-    def unauthorized():
-        flash("Please login first!", "warning")
-        return redirect(url_for("auth.login"))
-
-
 
     return app
 
