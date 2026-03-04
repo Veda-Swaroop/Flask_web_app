@@ -70,9 +70,11 @@ class RegisterForm(FlaskForm):
     )
 
     def validate_username(self, username):
+        if username.data.strip().lower() == "admin":
+            raise ValidationError(f"'{username.data}' is not available.")
         existing_user = Users.query.filter_by(username=username.data).first()
         if existing_user:
-            raise ValidationError("Username already exist. Please choose another")
+            raise ValidationError(f"'{username.data}' already exist. Please choose another")
         
 
 
