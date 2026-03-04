@@ -10,7 +10,7 @@ class Users(UserMixin, db.Model):
     password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
-    cart_items = db.relationship("Cart", back_populates="user")
+    cart_items = db.relationship("Cart", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
         return f"<Users(id = {self.id}, username = {self.username}, password = {self.password}, is_admin = {self.is_admin})>"
@@ -44,7 +44,7 @@ class Cart(db.Model):
     __tablename__ = 'cart_items'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('books.bookID'), nullable=False)
     quantity = db.Column(db.Integer, default=1)
 

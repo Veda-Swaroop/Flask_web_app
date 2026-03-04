@@ -8,7 +8,7 @@ class LoginForm(FlaskForm):
         validators=[
             InputRequired(message="Username is required."),
             Length(min=4, max=30, message="Username must be at least 4 characters."),
-            Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
+            Regexp(r'^\w{4,30}$', message="Only letters, numbers, and underscores allowed.")
         ],
         render_kw={
             "class": "form-control",
@@ -21,7 +21,7 @@ class LoginForm(FlaskForm):
     password = PasswordField(
         validators=[
             InputRequired(message="Password is required."),
-            Length(min=4, max=30, message="Password must be at least 4 characters.")
+            Length(min=8, max=30, message="Password must be at least 8 characters.")
         ],
         render_kw={
             "class": "form-control",
@@ -42,7 +42,7 @@ class RegisterForm(FlaskForm):
         validators=[
             InputRequired(message="Username is required."),
             Length(min=4, max=30, message="Username must be at least 4 characters."),
-            Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
+            Regexp(r'^\w{4,30}$', message="Only letters, numbers, and underscores allowed.")
         ],
         render_kw={
             "class": "form-control",
@@ -55,7 +55,7 @@ class RegisterForm(FlaskForm):
     password = PasswordField(
         validators=[
             InputRequired(message="Password is required."),
-            Length(min=4, max=30, message="Password must be at least 4 characters.")
+            Length(min=8, max=30, message="Password must be at least 8 characters.")
         ],
         render_kw={
             "class": "form-control",
@@ -84,7 +84,7 @@ class VerifyForm(FlaskForm):
         validators=[
             InputRequired(message="Username is required."),
             Length(min=4, max=30, message="Username must be at least 4 characters."),
-            Regexp(r'^[a-zA-Z0-9_]+$', message="Only letters, numbers, and underscores allowed.")
+            Regexp(r'^\w{4,30}$', message="Only letters, numbers, and underscores allowed.")
         ],
         render_kw={
             "class": "form-control",
@@ -105,7 +105,7 @@ class ResetForm(FlaskForm):
     new_password = PasswordField(
         validators=[
             InputRequired(message="Password is required."),
-            Length(min=4, max=30, message="Password must be at least 4 characters.")
+            Length(min=8, max=30, message="Password must be at least 8 characters.")
         ],
         render_kw={
             "class": "form-control",
@@ -119,7 +119,7 @@ class ResetForm(FlaskForm):
         validators=[
             InputRequired(message="Password is required."),
             EqualTo("new_password", message="Passwords must match!"),
-            Length(min=4, max=30, message="Password must be at least 4 characters.")
+            Length(min=8, max=30, message="Password must be at least 8 characters.")
         ],
         render_kw={
             "class": "form-control",
