@@ -13,7 +13,7 @@ class Users(UserMixin, db.Model):
     cart_items = db.relationship("Cart", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
-        return f"<Users(id = {self.id}, username = {self.username}, password = {self.password}, is_admin = {self.is_admin})>"
+        return f"<Users(id = {self.id}, username = {self.username}, is_admin = {self.is_admin})>"
 
 
 class Book(db.Model):
@@ -22,19 +22,20 @@ class Book(db.Model):
     # __bind_key__ = 'books_db'
 
     bookID = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text)
+    title = db.Column(db.Text, nullable=False)
     authors = db.Column(db.Text)
-    average_rating = db.Column(db.Float)
-    isbn = db.Column(db.Text)
-    isbn13 = db.Column(db.Integer)
-    language_code = db.Column(db.Text)
+    average_rating = db.Column(db.Numeric(3, 2))
+    isbn = db.Column(db.String(20))
+    isbn13 = db.Column(db.String(13))
+    language_code = db.Column(db.String(10))
     num_pages = db.Column(db.Integer)
     ratings_count = db.Column(db.Integer)
     text_reviews_count = db.Column(db.Integer)
-    publication_date = db.Column(db.Text)
+    publication_date = db.Column(db.Date)
     publisher = db.Column(db.Text)
 
-    cart_items = db.relationship("Cart", back_populates="book")
+
+    cart_items = db.relationship("Cart", back_populates="book", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Book(id={self.bookID}, title={self.title}, author={self.authors}, rating={self.average_rating})>"
@@ -45,7 +46,7 @@ class Cart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.bookID'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.bookID', ondelete="CASCADE"), nullable=False)
     quantity = db.Column(db.Integer, default=1)
 
     user = db.relationship("Users", back_populates="cart_items")

@@ -1,6 +1,7 @@
 from flask import Flask, flash, redirect, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
+from flask_migrate import Migrate
 from app.extensions import db
 from app.models import Users
 from dotenv import load_dotenv
@@ -17,14 +18,18 @@ def create_app():
     app = Flask(__name__)
    
     # Config
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE")
+    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+    # app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = os.getenv("SECRET_KEY")
 
 
     # init extensions
     csrf.init_app(app)
     db.init_app(app)
+
+    # Flask Migrate
+    migrate = Migrate(app, db)
 
     login_manager.init_app(app)
     login_manager.login_view = "auth.login" #type:ignore
@@ -42,10 +47,6 @@ def create_app():
     app.register_blueprint(auth)
     app.register_blueprint(admin)
     
-
-    # Create Tables
-    with app.app_context():
-        db.create_all()
 
     # load user for flask-login
     @login_manager.user_loader
