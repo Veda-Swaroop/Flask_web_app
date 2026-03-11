@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, flash, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from app.extensions import db
-from app.models import Users
+from app.models import User
 from app.forms import LoginForm, RegisterForm, ResetForm, VerifyForm
 
 auth = Blueprint("auth", __name__)
@@ -27,7 +27,7 @@ def login():
             flash("Enter username and password", "danger")
             return redirect(url_for("auth.login"))
         
-        user = Users.query.filter_by(username=usr_name).first()
+        user = User.query.filter_by(username=usr_name).first()
 
         if user and check_password_hash(user.password, pwd):
             login_user(user)
@@ -64,7 +64,7 @@ def register():
         usr_name = form.username.data
         pwd = form.password.data
  
-        user = Users(
+        user = User(
             username = usr_name,                     #type:ignore
             password = generate_password_hash(pwd)   #type:ignore
         )
@@ -88,7 +88,7 @@ def verify():
 
         usr_name = form.username.data
 
-        user = Users.query.filter_by(username=usr_name).first()
+        user = User.query.filter_by(username=usr_name).first()
     
         if user and usr_name != "admin":
             session["reset_user_id"] = user.id
@@ -122,7 +122,7 @@ def reset():
             flash("Session expired. Please verify again.", "danger")
             return redirect(url_for("auth.verify"))
 
-        user = Users.query.get(int(user_id))
+        user = User.query.get(int(user_id))
 
         if user:
             user.password = generate_password_hash(new_pwd)

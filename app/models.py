@@ -1,58 +1,94 @@
 from app.extensions import db
 from flask_login import UserMixin
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, Boolean, Text, Numeric, Integer, ForeignKey, DateTime, func
+from decimal import Decimal
+from datetime import date, datetime
+from typing import List, Optional
 
 
-class Users(UserMixin, db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True)
+    password: Mapped[str] = mapped_column(String(255))
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    cart_items = db.relationship("Cart", back_populates="user", cascade="all, delete-orphan")
+    cart: Mapped[Optional["Cart"]] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
+    orders: Mapped[List["Order"]] = relationship("Order", back_populates="user", cascade="all, delete-orphan")
+
     
     def __repr__(self) -> str:
-        return f"<Users(id = {self.id}, username = {self.username}, is_admin = {self.is_admin})>"
+        return f"<Users(id = {self.id}, username = {self.username})>"
 
 
 class Book(db.Model):
     __tablename__ = 'books'
 
-    # __bind_key__ = 'books_db'
+    bookID: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(Text)
+    authors: Mapped[str] = mapped_column(Text)
+    average_rating: Mapped[Decimal] = mapped_column(Numeric(3, 2))
+    isbn: Mapped[str] = mapped_column(String(20))
+    isbn13: Mapped[str] = mapped_column(String(13))
+    language_code: Mapped[str] = mapped_column(String(10))
+    num_pages: Mapped[int] = mapped_column(Integer)
+    ratings_count: Mapped[int] = mapped_column(Integer)
+    text_reviews_count: Mapped[int] = mapped_column(Integer)
+    publication_date: Mapped[date] = mapped_column()
+    publisher: Mapped[str] = mapped_column(Text)
 
-    bookID = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text, nullable=False)
-    authors = db.Column(db.Text)
-    average_rating = db.Column(db.Numeric(3, 2))
-    isbn = db.Column(db.String(20))
-    isbn13 = db.Column(db.String(13))
-    language_code = db.Column(db.String(10))
-    num_pages = db.Column(db.Integer)
-    ratings_count = db.Column(db.Integer)
-    text_reviews_count = db.Column(db.Integer)
-    publication_date = db.Column(db.Date)
-    publisher = db.Column(db.Text)
-
-
-    cart_items = db.relationship("Cart", back_populates="book", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Book(id={self.bookID}, title={self.title}, author={self.authors}, rating={self.average_rating})>"
 
 
 class Cart(db.Model):
-    __tablename__ = 'cart_items'
+    __tablename__ = 'carts'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.bookID', ondelete="CASCADE"), nullable=False)
-    quantity = db.Column(db.Integer, default=1)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
-    user = db.relationship("Users", back_populates="cart_items")
-    book = db.relationship("Book", back_populates="cart_items")
+    user: Mapped["User"] = relationship(back_populates="cart")
+    items: Mapped[List["CartItem"]] = relationship(back_populates="cart", cascade="all, delete-orphan")
 
-    __table__args__ = (db.UniqueConstraint('user_id', 'book_id', name='_user_book_uc'),)
+
     
 
+class CartItem(db.Model):
+    __tablename__ = "cart_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    cart_id: Mapped[int] = mapped_column(ForeignKey("carts.id", ondelete="CASCADE"))
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.bookID"))
+    quantity: Mapped[int] = mapped_column(server_default="1")
+
+    cart: Mapped["Cart"] = relationship(back_populates="items")
+    book: Mapped["Book"] = relationship("Book")
+
+
+class Order(db.Model):
+    __tablename__ = 'orders'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    status: Mapped[str] = mapped_column(String(20), server_default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+    user: Mapped["User"] = relationship("User", back_populates="orders")
+    order_items: Mapped[List["OrderItem"]] = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+class OrderItem(db.Model):
+    __tablename__ = "order_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.bookID"))
+    quantity: Mapped[int] = mapped_column(server_default="1")
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
+
+    order: Mapped["Order"] = relationship("Order", back_populates="order_items")
+    book: Mapped["Book"] = relationship("Book")
+    
 

@@ -25,7 +25,13 @@
                 {% if current_user.is_authenticated %}
                     <div class="d-flex align-items-center ms-auto gap-3">
                         <span class="navbar-text">
-                            <strong>Welcome, {{ current_user.username }} </strong>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><strong>Welcome, {{ current_user.username }} </strong></button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('main.my_orders') }}">My Orders</a></li>
+                                </ul>
+                            </div>
+                            
                         </span>
                         {% if not current_user.is_admin %}
                         <a class="btn btn-success" href="{{ url_for('main.check_cart') }}"><i class="bi bi-cart"></i> Cart</a>
@@ -91,6 +97,7 @@
 
                 const url = this.action;
                 const formData = new FormData(this); // Captures the CSRF token automatically
+                const currentForm = this; 
 
                 try {
                     // Send an asynchronous POST request to your Flask route
@@ -105,13 +112,22 @@
                     // Parse the JSON response returned by your add_to_cart route
                     const data = await response.json();
 
-                    // Determine the Bootstrap color category (e.g., success, info, danger)
-                    // If your backend returns 'error' as a status but no category, default to 'danger'
-                    const category = data.category || (data.status === 'error' ? 'danger' : 'success');
+                    if (data.status === 'success') {
+                        const itemContainer = currentForm.closest('.cart-item')
 
-                    // Show the dynamic toast
-                    showDynamicToast(data.message, category);
+                        if (data.action === 'incremented' && itemContainer) {
+                            const quantitySpan = itemContainer.querySelector('.item-quantity');
+                            if (quantitySpan) {
+                                quantitySpan.textContent = data.new_quantity;
+                            }
+                            showDynamicToast(data.message, data.category);
+                        }
+                        else {
+                            showDynamicToast(data.message, data.category);
+                        }
+                    }
 
+                   
                 } catch (error) {
                     console.error('Error adding to cart:', error);
                     showDynamicToast('An unexpected error occurred.', 'danger');
@@ -119,38 +135,7 @@
             });
         });
 
-        // 2. Function to create and display a Toast dynamically
-        function showDynamicToast(message, category) {
-            const toastContainer = document.querySelector('.toast-container');
-            if (!toastContainer) return;
 
-            // Build the HTML structure identical to your layout.html flashes
-            const toastHTML = `
-                <div class="toast align-items-center text-bg-${category} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-            `;
-
-            // Append the new toast to the existing toast container
-            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-
-            // Select the newly added toast element
-            const newToastElement = toastContainer.lastElementChild;
-
-            // Initialize and show the toast using Bootstrap's JS API
-            const toast = new bootstrap.Toast(newToastElement);
-            toast.show();
-
-            // Clean up: Remove the toast from the DOM after it has faded out
-            newToastElement.addEventListener('hidden.bs.toast', () => {
-                newToastElement.remove();
-            });
-        }
 
         // --- DELETE FROM CART AJAX LOGIC ---
         
@@ -211,6 +196,39 @@
         });
 
 
+
+        // Function to create and display a Toast dynamically
+        function showDynamicToast(message, category) {
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) return;
+
+            // Build the HTML structure identical to your layout.html flashes
+            const toastHTML = `
+                <div class="toast align-items-center text-bg-${category} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+            // Append the new toast to the existing toast container
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+            // Select the newly added toast element
+            const newToastElement = toastContainer.lastElementChild;
+
+            // Initialize and show the toast using Bootstrap's JS API
+            const toast = new bootstrap.Toast(newToastElement);
+            toast.show();
+
+            // Clean up: Remove the toast from the DOM after it has faded out
+            newToastElement.addEventListener('hidden.bs.toast', () => {
+                newToastElement.remove();
+            });
+        }
 
         </script>
 

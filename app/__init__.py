@@ -3,7 +3,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from app.extensions import db
-from app.models import Users
+from app.models import User
 from dotenv import load_dotenv
 import os
 
@@ -51,7 +51,7 @@ def create_app():
     # load user for flask-login
     @login_manager.user_loader
     def load_user(user_id):
-        return Users.query.get(int(user_id))
+        return User.query.get(int(user_id))
     
 
     return app

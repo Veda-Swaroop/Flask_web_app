@@ -6,7 +6,12 @@
 
         <h1> {{ current_user.username }}'s Cart </h1>
 
-        <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary">&larr; Go Back</a>
+            <a href="{{ url_for('main.buy_items') }}" class="btn btn-primary"> Proceed to Buy </a>
+        </div>
+
+        
 
     </div>
 
@@ -35,10 +40,17 @@
                 <p><strong>Quantity:</strong> <span class="item-quantity">{{ item.quantity }}</span></p>
 
                 <div class="d-flex gap-2 mt-3">
+
+                    <form action="{{ url_for('main.add_to_cart', book_id=item.book.bookID) }}" method="post" class="add_to_cart_form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary"> <i class="bi bi-cart-plus"></i> Add </button>
+                    </form>
+
                     <form action="{{ url_for('main.delete_from_cart', book_id=item.book.bookID) }}" method="post" class="delete_from_cart_form">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-primary"> <i class="bi bi-cart-dash"></i> Delete </button>
                     </form>
+
                 </div>
 
             </div>

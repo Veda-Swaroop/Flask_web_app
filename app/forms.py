@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, ValidationError
 from wtforms.validators import InputRequired, Length, Regexp, EqualTo
-from app.models import Users 
+from app.models import User
 
 class LoginForm(FlaskForm):
     username = StringField(
@@ -72,7 +72,7 @@ class RegisterForm(FlaskForm):
     def validate_username(self, username):
         if username.data.strip().lower() == "admin":
             raise ValidationError(f"'{username.data}' is not available.")
-        existing_user = Users.query.filter_by(username=username.data).first()
+        existing_user = User.query.filter_by(username=username.data).first()
         if existing_user:
             raise ValidationError(f"'{username.data}' already exist. Please choose another")
         

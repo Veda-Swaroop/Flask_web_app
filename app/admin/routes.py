@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from app.extensions import db
-from app.models import Users
+from app.models import User
 from flask_login import login_required, current_user
 
 admin = Blueprint("admin", __name__, url_prefix="/admin")
@@ -16,10 +16,10 @@ def dashboard():
         user_id = request.form.get("id")
         
         if user_id:
-            user = Users.query.get(int(user_id))
+            user = User.query.get(int(user_id))
             if user:
                 db.session.delete(user)
                 db.session.commit()
 
-    accounts = Users.query.all()
+    accounts = User.query.all()
     return render_template("admin.html", accounts=accounts)

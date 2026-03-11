@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="container my-4">
+    <h1 class="display-5">My Orders</h1>
+</div>
+
+{% if orders %}
+    {% for order in orders %}
+    <div class="container my-4">
+        <h5 class="text-muted">
+            Order #{{ order.id }} — {{ order.created_at.strftime('%d %b %Y') }} 
+            <span class="badge bg-success">{{ order.status }}</span>
+        </h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr class="table-primary">
+                    <th>S.No</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for item in order.order_items %}
+                <tr class="table-info">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.book.title }}</td>
+                    <td>{{ item.book.authors }}</td>
+                    <td>{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+
+{% else %}
+    <div class="container">
+        <p class="text-muted">No orders found.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

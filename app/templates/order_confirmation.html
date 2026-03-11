@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="container my-4">
+        <h1 class="display-5">Order Confirmed! 🎉</h1>
+    </div>
+
+    <div class="container text-center my-4">
+        <table class="table table-bordered">
+            <thead>
+                <tr class="table-primary">
+                    <th scope="col">S.No</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Quantity</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for item in items %}
+                <tr class="table-info">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.book.title }}</td>
+                    <td>{{ item.book.authors }}</td>
+                    <td>{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

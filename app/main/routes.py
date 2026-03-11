@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from app.extensions import db
 import os, textwrap
 
-from app.models import Book, Cart
+from app.models import Book, Cart, CartItem, Order, OrderItem
 
 main = Blueprint("main", __name__)
 
@@ -59,57 +59,72 @@ def book_details(book_id):
 @login_required
 def add_to_cart(book_id):
     
-    book = Book.query.get(book_id)
+    book = db.session.get(Book, book_id)
 
     if not book:
         return jsonify({"status": "error", "message": "Book not found"}), 404
     
-    cart_item = Cart.query.filter_by(user_id = current_user.id, book_id=book_id).first()
+    cart = Cart.query.filter_by(user_id = current_user.id).first()
+
+    if not cart:
+        cart = Cart(user_id = current_user.id) #type:ignore
+        db.session.add(cart)
+        db.session.commit()
+         
+
+    cart_item = CartItem.query.filter_by(cart_id = cart.id, book_id=book_id).first()
     
     title = book.title
     short_title = textwrap.shorten(title,width=30, placeholder="...." )
     
     if cart_item:
         cart_item.quantity += 1
-        message = f"Updated quantity for Book: '{short_title}'"
-        category = "info"
+        db.session.commit()
+        return jsonify(
+            {
+                "status": "success",
+                "action": "incremented",
+                "new_quantity": cart_item.quantity,
+                "message": f"Increased quantity for book: '{short_title}'",
+                "category": "info",
+            }
+        ), 200
+
     else:
-        new_item = Cart(user_id=current_user.id, book_id=book_id) #type: ignore
+        new_item = CartItem(cart_id = cart.id, book_id=book_id, quantity = 1) #type:ignore
         db.session.add(new_item)
-        message = f" Book: '{short_title}' Added to cart"
-        category = "success"
-    
-    db.session.commit()
-    # return redirect(request.referrer or url_for("main.home"))
-    return jsonify({
-        "status": "success",
-        "message": message,
-        "category": category,
-    }), 200
+        db.session.commit()
 
-
-@main.route("/check_cart", methods=["GET", "POST"])
-@login_required
-def check_cart():
-    user_cart = current_user.cart_items
-
-    if not user_cart:
-        flash("No books in cart", "warning")
-        return render_template("cart.html")
-
-    return render_template("cart.html", cart=user_cart)
+        return jsonify({
+            "status": "success",
+            "action": "added",
+            "message": f" Added '{short_title}' to cart",
+            "category": "success",
+        }), 200
 
 
 @main.route("/delete_from_cart/<int:book_id>", methods=["POST"])
 @login_required
 def delete_from_cart(book_id):
 
-    cart_item = Cart.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+    book = db.session.get(Book, book_id)
+
+    if not book:
+        return jsonify({"status": "error", "message": "Book not found"}), 404
+
+    cart = Cart.query.filter_by(user_id=current_user.id).first()
+
+    if not cart:
+        return jsonify({"status": "error", "message": "Cart not found"}), 404
+
         
+    cart_item = CartItem.query.filter_by(cart_id = cart.id, book_id=book_id).first()
+
     if not cart_item:
         return jsonify({"status": "error", "message": "Item not found in cart"}), 404
     
-    book = Book.query.get(book_id)
+
+    
     title = book.title #type:ignore
     short_title = textwrap.shorten(title,width=30, placeholder="...." )
 
@@ -120,7 +135,7 @@ def delete_from_cart(book_id):
             "status": "success",
             "action": "decremented",
             "new_quantity": cart_item.quantity,
-            "message": f"Decreased quanity for '{short_title}'",
+            "message": f"Decreased quantity for book: '{short_title}'",
             "category": "info",
         }), 200
 
@@ -138,7 +153,84 @@ def delete_from_cart(book_id):
 
 
 
+@main.route("/check_cart", methods=["GET", "POST"])
+@login_required
+def check_cart():
+    cart = current_user.cart
+
+    cart_items = cart.items if cart else []
+
+    if not cart_items:
+        flash("No books in cart", "warning")
+        return render_template("cart.html")
+
+    return render_template("cart.html", cart=cart_items)
+
+
 @main.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(main.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+
+
+@main.route("/buy", methods=["GET", "POST"])
+@login_required
+def buy_items():
+
+    cart_items = current_user.cart.items
+
+    if not cart_items:
+        flash("Cart is empty!", "warning")
+        return redirect(url_for("main.check_cart"))
+
+    return render_template("order.html", items=cart_items)
+
+@main.route("/order", methods=["POST"])
+@login_required
+def orders():
+
+    cart = current_user.cart
+    if not cart or not cart.items:
+        flash("Cart is Empty!", "warning")
+        return redirect(url_for("main.check_cart"))
+    order = Order(user_id=current_user.id, status="completed") #type:ignore
+    db.session.add(order)
+    db.session.flush()
+
+    cart_items = cart.items
+    order_items = []
+    for item in cart_items:
+        order_items.append(OrderItem(book_id=item.book.bookID, quantity=item.quantity, order_id=order.id)) #type:ignore
+
+    db.session.add_all(order_items)
+    db.session.flush()
+   
+
+    for item in cart_items:
+        db.session.delete(item)
+        
+    db.session.commit()
+
+    return redirect(url_for("main.order_confirmation", order_id=order.id))
+
+
+@main.route("/order_confirmation/<int:order_id>", methods=["GET"])
+@login_required
+def order_confirmation(order_id):
+    
+    order = Order.query.get_or_404(order_id)
+    return render_template("order_confirmation.html", items=order.order_items)
+
+
+@main.route("/my_orders", methods=["GET"])
+@login_required
+def my_orders():
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
+    
+    if not orders:
+        flash("You have no past orders.", "info")
+        return render_template("my_orders.html", orders=[])
+    
+    return render_template("my_orders.html", orders=orders)
