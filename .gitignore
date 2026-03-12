@@ -9,6 +9,9 @@ venv/
 # Flask instance folder
 instance/
 
+# Static covers folder
+app/static/covers/
+
 # SQLite database
 *.db
 *.sqlite
@@ -22,3 +25,4 @@ Thumbs.db
 
 # env files
 .env
+
