@@ -47,7 +47,7 @@ User ──< Cart  ──< CartItem  >── Book
 - **Cart** — One active cart per user
 - **CartItem** — Line items linking books to a cart with quantity
 - **Order** — A confirmed purchase placed by a user
-- **OrderItem** — Line items capturing book, quantity, and price at time of purchase
+- **OrderItem** — Line items capturing book, quantity at time of order
 
 ---
 
