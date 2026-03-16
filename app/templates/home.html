@@ -90,8 +90,7 @@
                 src="{{ url_for('static', filename='covers/' ~ book.bookID ~ '.jpg') }}" 
                 class="img-fluid rounded shadow w-50" 
                 alt="{{ book.title }}"
-                onerror="this.onerror=null; this.src='https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-L.jpg'; 
-                this.onerror=function(){this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';};"
+                onerror="this.onerror=null; this.src='https://placehold.co/300x450/555/FFF?text={{ book.title | urlencode }}';"
                 >
             </div>
             <!-- Right: Book Details -->
