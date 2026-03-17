@@ -76,8 +76,7 @@ pip install -r requirements.txt
 createdb bookstore_db
 
 # Configure environment variables
-cp .env.example .env
-# Edit .env and fill in DATABASE_URL and SECRET_KEY
+# Create and Edit .env file and fill in DATABASE_URL and SECRET_KEY
 
 # Set up the database tables
 flask db upgrade
