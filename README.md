@@ -1,5 +1,9 @@
 # BookStore — Full-Stack Flask Web Application
 
+<p align="center">
+    <img src="screenshots/Flask_final.gif" alt="demo" width=600>
+</p>
+
 A full-stack online bookstore built with **Python/Flask** while learning backend web development — covering user authentication, shopping cart and order flow, ORM modeling, and cloud deployment on AWS EC2. The catalog contains 12,000 books with cover art sourced from the Open Library API.
 
 **Live Demo:** [devport.co.in](https://devport.co.in)
