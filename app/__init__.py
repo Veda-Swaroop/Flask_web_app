@@ -18,17 +18,12 @@ def create_app():
     app = Flask(__name__)
    
     # Config
-    database_url = os.environ.get("DATABASE_URL", "")
-    database_url = database_url.replace("postgres://", "postgresql+psycopg2://").replace("postgresql://", "postgresql+psycopg2://")
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    # app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE")
     # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
     # app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = os.getenv("SECRET_KEY")
 
-    if not database_url:
-        raise RuntimeError("DATABASE_URL environment variable is not set!")
-    
+
     # init extensions
     csrf.init_app(app)
     db.init_app(app)
