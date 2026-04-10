@@ -26,7 +26,9 @@ def create_app():
     # app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = os.getenv("SECRET_KEY")
 
-
+    if not database_url:
+        raise RuntimeError("DATABASE_URL environment variable is not set!")
+    
     # init extensions
     csrf.init_app(app)
     db.init_app(app)
